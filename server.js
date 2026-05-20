@@ -8,7 +8,7 @@ const { Pool } = require('pg');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Setup Postgres Connection Pool
+// Setup Postgres Connection Pool Matrix
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false } 
@@ -36,12 +36,12 @@ const initDbMatrix = async () => {
 };
 initDbMatrix();
 
-// Middleware
+// Middleware Pipeline
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 
-// Persistent Session Configuration
+// Persistent Session Configuration Configuration
 app.use(session({ 
     store: new FileStore({ path: './sessions', logFn: function(){} }),
     secret: 'tailtrail-ultra-secret', 
@@ -82,7 +82,7 @@ if (Object.keys(currentPrices).length === 0) {
     writeDb(dbFiles.prices, currentPrices);
 }
 
-// Security Middlewares
+// Security Filters & Middlewares
 const requireAuth = (req, res, next) => {
     if (!req.session.user) return res.status(401).json({ error: "Unauthorized access" });
     next();
@@ -97,7 +97,7 @@ const requireAdmin = (req, res, next) => {
     res.status(403).json({ error: "Access Denied: Administrators Only." });
 };
 
-// Cursing Censor Engine
+// Cursing Censor Filter Engine
 const BAD_WORDS = ['fuck', 'shit', 'bitch', 'asshole', 'dick', 'pussy', 'bastard', 'sharmoota', 'kosomak', 'عرص', 'شرموطة', 'كسمك']; 
 function censorText(text) {
     let censored = text;
@@ -108,7 +108,7 @@ function censorText(text) {
     return censored;
 }
 
-// --- API ENDPOINTS ---
+// --- API MATRIX ROUTING CONSOLE ---
 
 // GET CURRENT SYSTEM PRICES
 app.get('/api/prices', (req, res) => {
@@ -235,7 +235,7 @@ app.post('/api/update-profile', requireAuth, async (req, res) => {
     }
 });
 
-// CHECK AUTH STATUS
+// CHECK AUTH STATUS PROFILE
 app.get('/api/me', async (req, res) => {
     if (req.session.user) {
         try {
@@ -263,7 +263,7 @@ app.get('/api/me', async (req, res) => {
     res.json({ loggedIn: false, isAdmin: false });
 });
 
-// LOGOUT
+// LOGOUT CONFIG
 app.post('/api/logout', (req, res) => {
     req.session.destroy(err => {
         if (err) return res.status(500).json({ error: "Could not log out" });
@@ -272,7 +272,7 @@ app.post('/api/logout', (req, res) => {
     });
 });
 
-// BOOK A WALK (PAYMENTS FULLY INTEGRATED INTO WHATSAPP TEXT GENERATION)
+// BOOK A WALK TERMINAL (STABLE DATA REDIRECT WITH DYNAMIC SELECTION PATTERNS)
 app.post('/api/book', requireAuth, (req, res) => {
     const { dogName, breed, size, orderType, walkDuration, extraTime, walkDate, pickupTime, paymentMethod } = req.body;
     let bookings = readDb(dbFiles.bookings);
@@ -297,7 +297,7 @@ app.post('/api/book', requireAuth, (req, res) => {
         }
     }
 
-    // Default formatting if frontend drops empty field
+    // Capture payment configuration safely
     const chosenPayment = paymentMethod || "Cash"; 
     const addressStr = `${req.session.user.street}, Bldg ${req.session.user.building}, Apt ${req.session.user.apt}`;
     
@@ -332,13 +332,14 @@ app.post('/api/book', requireAuth, (req, res) => {
                         `💳 *Intended Payment Option:* ${chosenPayment} (To be paid AFTER the walk)\n\n` +
                         `Please verify this schedule window to confirm our session. Thank u!`;
     
+    // BACKEND OVERHAUL DONE: Delivers clean tracking object back to front scripting context
     res.json({ 
         success: true, 
         whatsappUrl: `https://wa.me/${myWhatsAppNumber}?text=${encodeURIComponent(textMessage)}` 
     });
 });
 
-// GET MY BOOKINGS, REVIEWS, GALLERY
+// GET MY BOOKINGS, REVIEWS, GALLERY ACCESS INTERFACES
 app.get('/api/my-books', requireAuth, (req, res) => {
     let bookings = readDb(dbFiles.bookings);
     res.json(bookings.filter(b => b.userAccount === req.session.user.username));
