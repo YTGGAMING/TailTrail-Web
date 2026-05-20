@@ -3,132 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tail Trail - Book a Walk</title>
+    <title>Tail Trail - Secure Session Booking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #FF8A00;
-            --dark: #121212;
-            --light: #F8F9FA;
-            --grey: #242424;
-            --text-muted: #A0A0A0;
+        body {
+            background: #05070c; 
+            color: #f8fafc; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0; 
+            padding: 40px 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            box-sizing: border-box;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: var(--dark); color: var(--light); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .container { width: 100%; max-width: 600px; background: var(--grey); padding: 30px; border-radius: 15px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); border: 1px solid #333; margin-top: 20px; }
-        h1 { color: var(--primary); font-size: 2rem; margin-bottom: 10px; text-align: center; }
-        p.subtitle { text-align: center; color: var(--text-muted); margin-bottom: 25px; font-size: 0.95rem; }
-        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; }
-        label { font-weight: 600; margin-bottom: 8px; color: var(--light); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select { background: #1a1a1a; border: 1px solid #444; padding: 12px 15px; border-radius: 8px; color: var(--light); font-size: 1rem; transition: all 0.3s ease; width: 100%; }
-        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 8px rgba(255, 138, 0, 0.2); }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .btn-submit { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background 0.2s ease, transform 0.1s ease; width: 100%; margin-top: 10px; }
-        .btn-submit:hover { background: #e07a00; }
-        .btn-submit:active { transform: scale(0.98); }
-        .nav-link { display: inline-block; margin-top: 20px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
-        .nav-link:hover { color: var(--primary); }
+        .card {
+            background: rgba(10, 15, 30, 0.85); 
+            backdrop-filter: blur(12px); 
+            border: 2px solid #ff2a74;
+            border-radius: 20px; 
+            padding: 35px; 
+            width: 100%; 
+            max-width: 500px; 
+            box-shadow: 0 0 25px rgba(255, 42, 116, 0.25), inset 0 0 15px rgba(255, 42, 116, 0.1); 
+            box-sizing: border-box;
+        }
+        h2 { 
+            font-size: 24px; 
+            font-weight: 800; 
+            margin: 0 0 6px 0; 
+            text-align: center; 
+            color: #00f0ff;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+        }
+        p { 
+            color: #94a3b8; 
+            font-size: 14px; 
+            margin: 0 0 24px 0; 
+            text-align: center; 
+        }
+        label { 
+            display: block; 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: #ff2a74; 
+            margin-bottom: 6px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
+        input, select {
+            width: 100%; 
+            padding: 12px; 
+            background: rgba(0, 0, 0, 0.5); 
+            border: 1px solid #00f0ff;
+            color: white; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            margin-bottom: 16px; 
+            font-family: inherit; 
+            font-size: 14px;
+            transition: all 0.2s ease-in-out;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #ff2a74;
+            box-shadow: 0 0 10px rgba(255, 42, 116, 0.5);
+        }
+        .grid-2 { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+        }
+        .price-display {
+            background: rgba(0, 240, 255, 0.05); 
+            border: 2px dashed #00f0ff;
+            border-radius: 8px; 
+            padding: 15px; 
+            text-align: center; 
+            font-weight: 800; 
+            font-size: 18px; 
+            color: #00f0ff; 
+            margin-bottom: 20px;
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+            box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);
+        }
+        button {
+            width: 100%; 
+            padding: 14px; 
+            background: #ff2a74; 
+            border: none;
+            color: white; 
+            border-radius: 8px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 0 15px rgba(255, 42, 116, 0.4);
+        }
+        button:hover {
+            background: #00f0ff;
+            color: #05070c;
+            box-shadow: 0 0 20px #00f0ff;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Book a Session 🐾</h1>
-        <p class="subtitle">Fill out the matrix to calculate rates and set up your schedule workflow.</p>
-        
+    <div class="card">
+        <h2>Schedule a Session</h2>
+        <p>Your pricing adapts live based on size metrics and selections.</p>
+
         <form id="bookingForm">
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="dogName">Dog's Name</label>
-                    <input type="text" id="dogName" required placeholder="e.g., Max">
-                </div>
-                <div class="form-group">
-                    <label for="breed">Dog's Breed</label>
-                    <input type="text" id="breed" required placeholder="e.g., Golden Retriever">
-                </div>
+            <div class="grid-2">
+                <div><label>Dog Name</label><input type="text" id="dogName" required></div>
+                <div><label>Breed</label><input type="text" id="breed" required></div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="size">Dog's Size Category</label>
-                    <select id="size" required>
-                        <option value="small">Small (e.g., Puppy, Pomeranian)</option>
-                        <option value="medium">Medium (e.g., Husky, Boxer)</option>
-                        <option value="large">Large (e.g., German Shepherd, Great Dane)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="orderType">Order Structure</label>
-                    <select id="orderType" required>
-                        <option value="single">Single Walk Session</option>
-                        <option value="subscription">Weekly Subscription Plan</option>
-                    </select>
-                </div>
-            </div>
+            <label>Dog Size Category</label>
+            <select id="dogSize" onchange="calculatePrice()">
+                <option value="small">Small (0-10kg)</option>
+                <option value="medium">Medium (11-25kg)</option>
+                <option value="large">Large (26kg+)</option>
+            </select>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="walkDuration">Base Duration</label>
-                    <select id="walkDuration" required>
-                        <option value="30">30 Minutes</option>
-                        <option value="60">1 Hour</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="extraTime">Add Overtime Window</label>
-                    <select id="extraTime" required>
-                        <option value="0">No Extra Time</option>
-                        <option value="1">+30 Minutes (+50 EGP)</option>
-                        <option value="2">+60 Minutes (+100 EGP)</option>
-                    </select>
-                </div>
-            </div>
+            <label>Session Type</label>
+            <select id="orderType" onchange="toggleOrderFields()">
+                <option value="single">Single Custom Walk</option>
+                <option value="subscription">Weekly Subscription (5 Days/Wk)</option>
+            </select>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="walkDate">Scheduled Date</label>
-                    <input type="date" id="walkDate" required>
-                </div>
-                <div class="form-group">
-                    <label for="pickupTime">Pickup Time Window</label>
-                    <input type="time" id="pickupTime" required>
-                </div>
-            </div>
+            <div id="singleWalkFields">
+                <label>Walk Duration</label>
+                <select id="walkDuration" onchange="calculatePrice()">
+                    <option value="30">Single 30-Min Walk</option>
+                    <option value="60">Single 1-Hour Walk</option>
+                </select>
 
-            <div class="form-group">
-                <label for="paymentMethod">Payment Options (Settled AFTER Walk)</label>
-                <select id="paymentMethod" required>
-                    <option value="Cash">💵 Cash</option>
-                    <option value="Instapay">📱 Instapay</option>
-                    <option value="Telda">💳 Telda</option>
+                <label>Add Extra Time (+50 EGP per 30m)</label>
+                <select id="extraTime" onchange="calculatePrice()">
+                    <option value="0">No Extra Time</option>
+                    <option value="1">+30 Minutes</option>
+                    <option value="2">+1 Hour</option>
                 </select>
             </div>
 
-            <button type="submit" class="btn-submit">Submit Request & Open WhatsApp</button>
+            <div class="grid-2">
+                <div><label>Date</label><input type="date" id="walkDate" required></div>
+                <div><label>Pickup Time Frame</label><input type="time" id="pickupTime" required></div>
+            </div>
+
+            <label>Payment Option (Settled AFTER Walk)</label>
+            <select id="paymentMethod" required>
+                <option value="Cash">💵 Cash</option>
+                <option value="Instapay">📱 Instapay</option>
+                <option value="Telda">💳 Telda</option>
+            </select>
+
+            <div class="price-display" id="totalPriceBox">Calculating Rate...</div>
+
+            <button type="submit">Verify & Request via WhatsApp</button>
         </form>
-        
-        <center><a href="/index.html" class="nav-link">← Return back to Main Console</a></center>
     </div>
 
     <script>
-        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
-            e.preventDefault(); // CRITICAL: Stop the page from exploding into raw JSON text screen!
+        let liveRates = {};
 
-            // Package the full data payload matrix
+        async function fetchSystemPrices() {
+            const res = await fetch('/api/prices');
+            liveRates = await res.json();
+            calculatePrice();
+        }
+
+        function toggleOrderFields() {
+            const type = document.getElementById('orderType').value;
+            document.getElementById('singleWalkFields').style.display = (type === 'subscription') ? 'none' : 'block';
+            calculatePrice();
+        }
+
+        function calculatePrice() {
+            if (!liveRates.single_30_small) return;
+
+            const size = document.getElementById('dogSize').value;
+            const type = document.getElementById('orderType').value;
+            let finalPrice = 0;
+
+            if (type === 'subscription') {
+                finalPrice = liveRates[`sub_${size}`];
+            } else {
+                const duration = document.getElementById('walkDuration').value;
+                const extra = parseInt(document.getElementById('extraTime').value) || 0;
+                
+                const baseKey = duration === '30' ? `single_30_${size}` : `single_60_${size}`;
+                finalPrice = liveRates[baseKey] + (extra * 50);
+            }
+
+            document.getElementById('totalPriceBox').innerText = `Estimated Cost: ${finalPrice} EGP`;
+        }
+
+        // FIXED: Added background form interceptor to execute WhatsApp redirect instantly 
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); 
+
             const formData = {
                 dogName: document.getElementById('dogName').value,
                 breed: document.getElementById('breed').value,
-                size: document.getElementById('size').value,
+                size: document.getElementById('dogSize').value,
                 orderType: document.getElementById('orderType').value,
                 walkDuration: document.getElementById('walkDuration').value,
                 extraTime: document.getElementById('extraTime').value,
                 walkDate: document.getElementById('walkDate').value,
                 pickupTime: document.getElementById('pickupTime').value,
-                paymentMethod: document.getElementById('paymentMethod').value // Grabs your selected option live
+                paymentMethod: document.getElementById('paymentMethod').value
             };
 
             try {
-                // Post data silently to the server route background pipeline
                 const response = await fetch('/api/book', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -136,7 +227,7 @@
                 });
 
                 if (response.status === 401) {
-                    alert("Unauthorized access! Please clear your cookie profiles, log out, and register a fresh account.");
+                    alert("Unauthorized access! Please log in again.");
                     window.location.href = "/index.html";
                     return;
                 }
@@ -144,16 +235,18 @@
                 const data = await response.json();
 
                 if (data.success && data.whatsappUrl) {
-                    // THE REDIRECT SOLUTION: Forces current window layer straight into WhatsApp cleanly!
+                    // Launch WhatsApp tab directly!
                     window.location.href = data.whatsappUrl;
                 } else {
-                    alert("System matrix error: " + (data.error || "Could not process booking."));
+                    alert("Error: " + (data.error || "Could not process your request."));
                 }
             } catch (err) {
-                console.error("Networking error:", err);
-                alert("Connection matrix broken. Check backend log channels.");
+                console.error("Network error:", err);
+                alert("Matrix connection issue. Check server status.");
             }
         });
+
+        window.onload = () => { fetchSystemPrices(); };
     </script>
 </body>
 </html>
