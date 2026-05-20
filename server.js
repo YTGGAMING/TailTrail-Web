@@ -3,9 +3,38 @@ const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 const fs = require('fs');
 const path = require('path');
+const { Pool } = require('pg'); // Postgres integration
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Setup Postgres Connection Pool
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false } // Required for Render cloud connections
+});
+
+// Automatically create the users table in your Postgres database if it doesn't exist
+const initDbMatrix = async () => {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
+                username VARCHAR(50) PRIMARY KEY,
+                display_name VARCHAR(100),
+                password VARCHAR(100),
+                phone VARCHAR(50),
+                street VARCHAR(255),
+                building VARCHAR(50),
+                apt VARCHAR(50),
+                joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log("Database matrix synchronized successfully: Users table is ready.");
+    } catch (err) {
+        console.error("Error initializing database matrix:", err);
+    }
+};
+initDbMatrix();
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -24,9 +53,8 @@ app.use(session({
     }
 }));
 
-// Local JSON Databases Initialization
+// Local JSON Databases Initialization (Keeping remaining services on JSON for now)
 const dbFiles = {
-    users: 'users.json',
     bookings: 'bookings.json',
     reviews: 'reviews.json',
     tracking: 'tracking.json',
@@ -98,84 +126,139 @@ app.post('/api/admin/update-prices', requireAuth, requireAdmin, (req, res) => {
     res.json({ success: true, prices: priceMatrix });
 });
 
-// REGISTER ACCOUNT
-app.post('/api/register', (req, res) => {
+// REGISTER ACCOUNT (SAVED PERMANENTLY TO POSTGRES)
+app.post('/api/register', async (req, res) => {
     const { username, displayName, password, phone, street, building, apt } = req.body;
-    let users = readDb(dbFiles.users);
     const cleanUsername = username.trim().toLowerCase();
     
-    if (users.some(u => u.username === cleanUsername)) {
-        return res.status(400).json({ error: "Username is already taken. Try another!" });
+    try {
+        const userCheck = await pool.query('SELECT * FROM users WHERE username = $1', [cleanUsername]);
+        if (userCheck.rows.length > 0) {
+            return res.status(400).json({ error: "Username is already taken. Try another!" });
+        }
+        
+        const insertQuery = `
+            INSERT INTO users (username, display_name, password, phone, street, building, apt) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *
+        `;
+        const result = await pool.query(insertQuery, [cleanUsername, displayName, password, phone, street, building, apt]);
+        const newUser = {
+            username: result.rows[0].username,
+            displayName: result.rows[0].display_name,
+            password: result.rows[0].password,
+            phone: result.rows[0].phone,
+            street: result.rows[0].street,
+            building: result.rows[0].building,
+            apt: result.rows[0].apt,
+            joined: result.rows[0].joined
+        };
+        
+        req.session.user = newUser;
+        res.json({ success: true, user: newUser });
+    } catch (err) {
+        res.status(500).json({ error: "Database error during registration." });
     }
-    
-    const newUser = { 
-        username: cleanUsername, displayName, password, phone, street, building, apt, 
-        joined: new Date() 
-    };
-    
-    users.push(newUser);
-    writeDb(dbFiles.users, users);
-    
-    req.session.user = newUser;
-    res.json({ success: true, user: newUser });
 });
 
-// SECURE LOGIN
-app.post('/api/login', (req, res) => {
+// SECURE LOGIN (LOOKS UP INSIDE POSTGRES)
+app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
-    let users = readDb(dbFiles.users);
     const cleanUsername = username.trim().toLowerCase();
     
-    const user = users.find(u => u.username === cleanUsername && u.password === password);
-    if (!user) {
-        return res.status(401).json({ error: "Invalid username or password." });
+    try {
+        const result = await pool.query('SELECT * FROM users WHERE username = $1 AND password = $2', [cleanUsername, password]);
+        if (result.rows.length === 0) {
+            return res.status(401).json({ error: "Invalid username or password." });
+        }
+        
+        const user = {
+            username: result.rows[0].username,
+            displayName: result.rows[0].display_name,
+            password: result.rows[0].password,
+            phone: result.rows[0].phone,
+            street: result.rows[0].street,
+            building: result.rows[0].building,
+            apt: result.rows[0].apt,
+            joined: result.rows[0].joined
+        };
+        
+        req.session.user = user;
+        res.json({ success: true, user });
+    } catch (err) {
+        res.status(500).json({ error: "Database error during login." });
     }
-    
-    req.session.user = user;
-    res.json({ success: true, user });
 });
 
-// UPDATE USER PROFILE SETTINGS (FIXES SYNCHRONIZATION ERROR)
-app.post('/api/update-profile', requireAuth, (req, res) => {
+// UPDATE USER PROFILE SETTINGS (SAVES PERMANENTLY TO POSTGRES)
+app.post('/api/update-profile', requireAuth, async (req, res) => {
     const { displayName, phone, street, building, apt, password } = req.body;
-    let users = readDb(dbFiles.users);
+    const username = req.session.user.username;
     
-    const userIndex = users.findIndex(u => u.username === req.session.user.username);
-    
-    if (userIndex === -1) {
-        return res.status(404).json({ error: "User profile not found inside data matrix." });
-    }
+    try {
+        const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "User profile not found inside data matrix." });
+        }
 
-    // Update the matrix parameters safely
-    users[userIndex].displayName = displayName || users[userIndex].displayName;
-    users[userIndex].phone = phone || users[userIndex].phone;
-    users[userIndex].street = street || users[userIndex].street;
-    users[userIndex].building = building || users[userIndex].building;
-    users[userIndex].apt = apt || users[userIndex].apt;
-    
-    if (password && password.trim() !== "") {
-        users[userIndex].password = password;
-    }
+        const current = result.rows[0];
+        const updatedDisplayName = displayName || current.display_name;
+        const updatedPhone = phone || current.phone;
+        const updatedStreet = street || current.street;
+        const updatedBuilding = building || current.building;
+        const updatedApt = apt || current.apt;
+        const updatedPassword = (password && password.trim() !== "") ? password : current.password;
 
-    // Write modifications back to database
-    writeDb(dbFiles.users, users);
-    
-    // Synchronize your active server session 
-    req.session.user = users[userIndex];
-    
-    res.json({ success: true, user: users[userIndex] });
+        const updateQuery = `
+            UPDATE users 
+            SET display_name = $1, phone = $2, street = $3, building = $4, apt = $5, password = $6 
+            WHERE username = $7 RETURNING *
+        `;
+        const updatedResult = await pool.query(updateQuery, [
+            updatedDisplayName, updatedPhone, updatedStreet, updatedBuilding, updatedApt, updatedPassword, username
+        ]);
+
+        const updatedUser = {
+            username: updatedResult.rows[0].username,
+            displayName: updatedResult.rows[0].display_name,
+            password: updatedResult.rows[0].password,
+            phone: updatedResult.rows[0].phone,
+            street: updatedResult.rows[0].street,
+            building: updatedResult.rows[0].building,
+            apt: updatedResult.rows[0].apt,
+            joined: updatedResult.rows[0].joined
+        };
+        
+        req.session.user = updatedUser;
+        res.json({ success: true, user: updatedUser });
+    } catch (err) {
+        res.status(500).json({ error: "Database error updating profile settings." });
+    }
 });
 
 // CHECK AUTH STATUS & INJECT ADMIN METRICS
-app.get('/api/me', (req, res) => {
+app.get('/api/me', async (req, res) => {
     if (req.session.user) {
-        let users = readDb(dbFiles.users);
-        let currentUser = users.find(u => u.username === req.session.user.username);
-        if (currentUser) {
-            req.session.user = currentUser;
-            const uname = currentUser.username.toLowerCase();
-            const isAdmin = (uname === 'ytg' || uname === 'judymassoud');
-            return res.json({ loggedIn: true, user: currentUser, isAdmin });
+        try {
+            const result = await pool.query('SELECT * FROM users WHERE username = $1', [req.session.user.username]);
+            if (result.rows.length > 0) {
+                const currentUser = {
+                    username: result.rows[0].username,
+                    displayName: result.rows[0].display_name,
+                    password: result.rows[0].password,
+                    phone: result.rows[0].phone,
+                    street: result.rows[0].street,
+                    building: result.rows[0].building,
+                    apt: result.rows[0].apt,
+                    joined: result.rows[0].joined
+                };
+                req.session.user = currentUser;
+                const uname = currentUser.username.toLowerCase();
+                const isAdmin = (uname === 'ytg' || uname === 'judymassoud');
+                return res.json({ loggedIn: true, user: currentUser, isAdmin });
+            }
+        } catch (err) {
+            // Fallback to session if db check fails temporarily
+            return res.json({ loggedIn: true, user: req.session.user, isAdmin: false });
         }
     }
     res.json({ loggedIn: false, isAdmin: false });
