@@ -3,7 +3,7 @@ const session = require('express-session');
 const FileStore = require('session-file-store')(session);
 const fs = require('fs');
 const path = require('path');
-const { Pool } = require('pg'); // Postgres integration
+const { Pool } = require('pg'); 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 // Setup Postgres Connection Pool
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false } // Required for Render cloud connections
+    ssl: { rejectUnauthorized: false } 
 });
 
 // Automatically create the users table in your Postgres database if it doesn't exist
@@ -53,7 +53,7 @@ app.use(session({
     }
 }));
 
-// Local JSON Databases Initialization (Keeping remaining services on JSON for now)
+// Local JSON Databases Initialization
 const dbFiles = {
     bookings: 'bookings.json',
     reviews: 'reviews.json',
@@ -126,7 +126,7 @@ app.post('/api/admin/update-prices', requireAuth, requireAdmin, (req, res) => {
     res.json({ success: true, prices: priceMatrix });
 });
 
-// REGISTER ACCOUNT (SAVED PERMANENTLY TO POSTGRES)
+// REGISTER ACCOUNT
 app.post('/api/register', async (req, res) => {
     const { username, displayName, password, phone, street, building, apt } = req.body;
     const cleanUsername = username.trim().toLowerCase();
@@ -160,7 +160,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// SECURE LOGIN (LOOKS UP INSIDE POSTGRES)
+// SECURE LOGIN
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     const cleanUsername = username.trim().toLowerCase();
@@ -189,7 +189,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// UPDATE USER PROFILE SETTINGS (SAVES PERMANENTLY TO POSTGRES)
+// UPDATE USER PROFILE SETTINGS
 app.post('/api/update-profile', requireAuth, async (req, res) => {
     const { displayName, phone, street, building, apt, password } = req.body;
     const username = req.session.user.username;
@@ -235,7 +235,7 @@ app.post('/api/update-profile', requireAuth, async (req, res) => {
     }
 });
 
-// CHECK AUTH STATUS & INJECT ADMIN METRICS
+// CHECK AUTH STATUS
 app.get('/api/me', async (req, res) => {
     if (req.session.user) {
         try {
@@ -257,7 +257,6 @@ app.get('/api/me', async (req, res) => {
                 return res.json({ loggedIn: true, user: currentUser, isAdmin });
             }
         } catch (err) {
-            // Fallback to session if db check fails temporarily
             return res.json({ loggedIn: true, user: req.session.user, isAdmin: false });
         }
     }
@@ -273,9 +272,9 @@ app.post('/api/logout', (req, res) => {
     });
 });
 
-// BOOK A WALK (AUTOMATED CALCULATION AGAINST LIVE PRICE DB)
+// BOOK A WALK (PAYMENTS FULLY INTEGRATED INTO WHATSAPP TEXT GENERATION)
 app.post('/api/book', requireAuth, (req, res) => {
-    const { dogName, breed, size, orderType, walkDuration, extraTime, walkDate, pickupTime } = req.body;
+    const { dogName, breed, size, orderType, walkDuration, extraTime, walkDate, pickupTime, paymentMethod } = req.body;
     let bookings = readDb(dbFiles.bookings);
     const rates = readDb(dbFiles.prices);
     
@@ -298,7 +297,10 @@ app.post('/api/book', requireAuth, (req, res) => {
         }
     }
 
+    // Default formatting if frontend drops empty field
+    const chosenPayment = paymentMethod || "Cash"; 
     const addressStr = `${req.session.user.street}, Bldg ${req.session.user.building}, Apt ${req.session.user.apt}`;
+    
     const newBooking = {
         userAccount: req.session.user.username,
         userPhone: req.session.user.phone,
@@ -307,6 +309,7 @@ app.post('/api/book', requireAuth, (req, res) => {
         dogName, breed, size, plan: planSummary,
         price: `${finalizedPrice} EGP`,
         scheduledDate: walkDate, scheduledTime: pickupTime,
+        paymentMethod: chosenPayment,
         dateBooked: new Date().toLocaleDateString('en-US'),
         status: 'Active'
     };
@@ -326,14 +329,13 @@ app.post('/api/book', requireAuth, (req, res) => {
                         `⚖️ *Size Category:* ${size.toUpperCase()}\n` +
                         `🗓️ *Selected Plan:* ${planSummary}\n` +
                         `💰 *Total Rate:* ${finalizedPrice} EGP\n\n` +
-                        `Please verify this schedule window to confirm our session. Thank you!`;
+                        `💳 *Intended Payment Option:* ${chosenPayment} (To be paid AFTER the walk)\n\n` +
+                        `Please verify this schedule window to confirm our session. Thank u!`;
     
-    res.send(`
-        <script>
-            window.open("https://wa.me/${myWhatsAppNumber}?text=${encodeURIComponent(textMessage)}", "_blank");
-            window.location.href = "/index.html";
-        </script>
-    `);
+    res.json({ 
+        success: true, 
+        whatsappUrl: `https://wa.me/${myWhatsAppNumber}?text=${encodeURIComponent(textMessage)}` 
+    });
 });
 
 // GET MY BOOKINGS, REVIEWS, GALLERY
