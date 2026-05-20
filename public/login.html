@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tail Trail - Security Gateway</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #05070c;
+            color: #f8fafc;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .card {
+            background: rgba(10, 15, 30, 0.85);
+            backdrop-filter: blur(12px);
+            border: 2px solid #ff2a74;
+            border-radius: 20px;
+            padding: 35px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 0 25px rgba(255, 42, 116, 0.25), inset 0 0 15px rgba(255, 42, 116, 0.1);
+            box-sizing: border-box;
+        }
+        h2 {
+            color: #00f0ff;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+        }
+        .tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 24px;
+            background: rgba(0,0,0,0.4);
+            padding: 6px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+        .tab {
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            border-radius: 8px;
+            color: #94a3b8;
+            transition: all 0.2s ease-in-out;
+        }
+        .tab.active {
+            background: #ff2a74;
+            color: white;
+            box-shadow: 0 0 10px rgba(255, 42, 116, 0.4);
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #00f0ff;
+            color: #fff;
+            border-radius: 8px;
+            box-sizing: border-box;
+            margin-bottom: 16px;
+            font-family: inherit;
+            transition: all 0.2s ease-in-out;
+        }
+        input:focus {
+            outline: none;
+            border-color: #ff2a74;
+            box-shadow: 0 0 10px rgba(255, 42, 116, 0.5);
+        }
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #ff2a74;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #ff2a74;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 0 15px rgba(255, 42, 116, 0.4);
+        }
+        button:hover {
+            background: #00f0ff;
+            color: #05070c;
+            box-shadow: 0 0 20px #00f0ff;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2 style="margin: 0 0 4px 0; font-weight: 800; text-align: center;">Tail Trail Secure Access</h2>
+        <p style="color: #94a3b8; font-size: 13px; text-align: center; margin: 0 0 24px 0;">Sign in or establish a profile below.</p>
+        
+        <div class="tabs">
+            <div class="tab active" id="loginTab" onclick="switchForm('login')">Sign In</div>
+            <div class="tab" id="registerTab" onclick="switchForm('register')">Create Profile</div>
+        </div>
+
+        <form id="loginForm" onsubmit="executeLogin(event)">
+            <label>Unique Username</label>
+            <input type="text" id="loginUser" placeholder="e.g. ziad123" required>
+
+            <label>Password</label>
+            <input type="password" id="loginPass" placeholder="••••••••" required>
+
+            <button type="submit">Unlock System Gateway</button>
+        </form>
+
+        <form id="registerForm" onsubmit="executeRegister(event)" style="display: none;">
+            <label>Unique Username (Cannot be changed)</label>
+            <input type="text" id="regUser" placeholder="e.g. hussein99" required>
+
+            <label>Public Display Name</label>
+            <input type="text" id="regDisplay" placeholder="e.g. Hussein" required>
+
+            <label>Account Password</label>
+            <input type="password" id="regPass" placeholder="Minimum 4 characters" required>
+
+            <label>Phone Number</label>
+            <input type="tel" id="regPhone" placeholder="e.g. 01023456789" required>
+
+            <div class="grid-2">
+                <div>
+                    <label>Street</label>
+                    <input type="text" id="regStreet" placeholder="e.g. El Teseen" required>
+                </div>
+                <div>
+                    <label>Building</label>
+                    <input type="text" id="regBldg" placeholder="e.g. 45" required>
+                </div>
+            </div>
+            
+            <label>Apartment No.</label>
+            <input type="text" id="regApt" placeholder="e.g. 3B" required>
+
+            <button type="submit">Complete Identity Registration</button>
+        </form>
+    </div>
+
+    <script>
+        function switchForm(mode) {
+            document.getElementById('loginTab').classList.toggle('active', mode === 'login');
+            document.getElementById('registerTab').classList.toggle('active', mode === 'register');
+            document.getElementById('loginForm').style.display = (mode === 'login') ? 'block' : 'none';
+            document.getElementById('registerForm').style.display = (mode === 'register') ? 'block' : 'none';
+        }
+
+        async function executeLogin(e) {
+            e.preventDefault();
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: document.getElementById('loginUser').value,
+                    password: document.getElementById('loginPass').value
+                })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                window.location.href = "/index.html";
+            } else {
+                alert(data.error || "Login credentials unauthorized.");
+            }
+        }
+
+        async function executeRegister(e) {
+            e.preventDefault();
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: document.getElementById('regUser').value,
+                    displayName: document.getElementById('regDisplay').value,
+                    password: document.getElementById('regPass').value,
+                    phone: document.getElementById('regPhone').value,
+                    street: document.getElementById('regStreet').value,
+                    building: document.getElementById('regBldg').value,
+                    apt: document.getElementById('regApt').value
+                })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                window.location.href = "/index.html";
+            } else {
+                alert(data.error || "Failed to process profile data.");
+            }
+        }
+
+        window.onload = async () => {
+            const res = await fetch('/api/me');
+            const data = await res.json();
+            if (data.loggedIn) window.location.href = "/index.html";
+        };
+    </script>
+</body>
+</html>

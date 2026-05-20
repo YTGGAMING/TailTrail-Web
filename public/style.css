@@ -1,0 +1,103 @@
+/* ==========================================================================
+   NEON CYBERPUNK THEME ENGINE OVERRIDE - CORESYSTEM COLORS ONLY
+   ========================================================================== */
+
+:root {
+    /* Pure High-Contrast Neon Triggers */
+    --neon-cyan: #00f2fe;
+    --neon-pink: #ff007f;
+    --neon-purple: #9d4edd;
+    
+    /* Global Palette Overrides for Atmosphere */
+    --bg: #05050d;
+    --card-bg: rgba(10, 10, 25, 0.75);
+    --text: #f1f5f9;
+    --muted: #64748b;
+    --border: rgba(0, 242, 254, 0.2);
+    
+    /* Ambient Glow Arrays */
+    --gradient-primary: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-pink) 100%);
+    --cyber-glow: 0 0 25px rgba(0, 242, 254, 0.25), 0 0 50px rgba(255, 0, 127, 0.15);
+}
+
+/* Light Mode Adaptability Rules */
+body.light-mode {
+    --bg: #f1f5f9;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: rgba(15, 23, 42, 0.1);
+    --gradient-primary: linear-gradient(135deg, #0284c7 0%, #db2777 100%);
+    --cyber-glow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Base Document Ambient Layering */
+body {
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    position: relative;
+}
+
+/* Deep Cyber Ambient Backdrop Effects */
+body::before {
+    content: '';
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(0, 242, 254, 0.08) 0%, transparent 70%);
+    top: -10%;
+    left: -10%;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* Core Container & Card Glow Injections */
+.card, .settings-modal, .admin-modal, .test-modal, .modal {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--cyber-glow) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* Active Environment Hover Glow Triggers */
+.card:hover, .settings-modal:hover, .admin-modal:hover {
+    border-color: rgba(0, 242, 254, 0.4) !important;
+    box-shadow: 0 0 30px rgba(0, 242, 254, 0.2), 0 0 60px rgba(255, 0, 127, 0.1) !important;
+}
+
+/* Heading Typography Accent Animations */
+h1, h2, .brand-title {
+    background: linear-gradient(135deg, var(--neon-cyan) 0%, #a0fe00 35%, var(--neon-pink) 70%, var(--neon-purple) 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: neonShiftEngine 6s ease infinite;
+}
+
+@keyframes neonShiftEngine {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Core Action Button Radiant System */
+button, .action-btn, .submit-btn {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.15, 0.85, 0.45, 1) !important;
+}
+
+/* Button Neon Hover States */
+button:hover, .action-btn:hover, .submit-btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.6), 0 0 40px rgba(255, 0, 127, 0.3) !important;
+}
+
+/* Input Terminal Neon Accent Highlights */
+input:focus, textarea:focus, select:focus {
+    outline: none !important;
+    border-color: var(--neon-cyan) !important;
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.3) !important;
+    background: rgba(0, 242, 254, 0.02) !important;
+}

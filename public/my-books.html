@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tail Trail - My Bookings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #05070c; 
+            color: #f8fafc; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0; 
+            padding: 40px 20px; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            box-sizing: border-box;
+        }
+        nav {
+            margin-bottom: 25px;
+            background: rgba(10, 15, 30, 0.85);
+            padding: 12px 24px;
+            border-radius: 30px;
+            border: 1px solid #00f0ff;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.15);
+        }
+        nav a {
+            color: #00f0ff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            transition: color 0.2s;
+            padding: 0 5px;
+        }
+        nav a:hover {
+            color: #ff2a74;
+            text-shadow: 0 0 8px rgba(255, 42, 116, 0.6);
+        }
+        .card {
+            background: rgba(10, 15, 30, 0.85); 
+            backdrop-filter: blur(12px); 
+            border: 2px solid #ff2a74;
+            border-radius: 20px; 
+            padding: 35px; 
+            width: 100%; 
+            max-width: 500px; 
+            box-shadow: 0 0 25px rgba(255, 42, 116, 0.25), inset 0 0 15px rgba(255, 42, 116, 0.1); 
+            box-sizing: border-box;
+        }
+        h2 { 
+            font-size: 24px; 
+            font-weight: 800; 
+            margin: 0 0 20px 0; 
+            text-align: center; 
+            color: #00f0ff;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+        }
+        .booking-item {
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2); 
+            padding: 15px 0;
+            color: #f8fafc;
+        }
+        .booking-item:last-child {
+            border-bottom: none;
+        }
+        .booking-item strong {
+            color: #ff2a74;
+            font-size: 16px;
+        }
+        small {
+            color: #94a3b8;
+            display: inline-block;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="book.html">Book Walk</a> | <a href="track.html">Track My Dog</a>
+    </nav>
+    <div class="card">
+        <h2>My Books</h2>
+        <div id="history">Loading...</div>
+    </div>
+    <script>
+        fetch('/api/my-books').then(res => {
+            if(res.redirected) window.location.href = res.url; 
+            return res.json();
+        }).then(data => {
+            const container = document.getElementById('history');
+            if(data.length === 0) container.innerHTML = '<p style="text-align:center; color:#94a3b8;">No bookings yet.</p>';
+            else container.innerHTML = data.map(b => `
+                <div class="booking-item">
+                    <strong>${b.dogName}</strong> - ${b.plan}<br>
+                    <small>${b.date} | ${b.address}</small>
+                </div>
+            `).join('');
+        });
+    </script>
+</body>
+</html>

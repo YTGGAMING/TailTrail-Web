@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tail Trail - Secure Session Booking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #05070c; 
+            color: #f8fafc; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0; 
+            padding: 40px 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            box-sizing: border-box;
+        }
+        .card {
+            background: rgba(10, 15, 30, 0.85); 
+            backdrop-filter: blur(12px); 
+            border: 2px solid #ff2a74;
+            border-radius: 20px; 
+            padding: 35px; 
+            width: 100%; 
+            max-width: 500px; 
+            box-shadow: 0 0 25px rgba(2ff, 42, 116, 0.25), inset 0 0 15px rgba(255, 42, 116, 0.1); 
+            box-sizing: border-box;
+        }
+        h2 { 
+            font-size: 24px; 
+            font-weight: 800; 
+            margin: 0 0 6px 0; 
+            text-align: center; 
+            color: #00f0ff;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+        }
+        p { 
+            color: #94a3b8; 
+            font-size: 14px; 
+            margin: 0 0 24px 0; 
+            text-align: center; 
+        }
+        label { 
+            display: block; 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: #ff2a74; 
+            margin-bottom: 6px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
+        input, select {
+            width: 100%; 
+            padding: 12px; 
+            background: rgba(0, 0, 0, 0.5); 
+            border: 1px solid #00f0ff;
+            color: white; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            margin-bottom: 16px; 
+            font-family: inherit; 
+            font-size: 14px;
+            transition: all 0.2s ease-in-out;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #ff2a74;
+            box-shadow: 0 0 10px rgba(255, 42, 116, 0.5);
+        }
+        .grid-2 { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+        }
+        .price-display {
+            background: rgba(0, 240, 255, 0.05); 
+            border: 2px dashed #00f0ff;
+            border-radius: 8px; 
+            padding: 15px; 
+            text-align: center; 
+            font-weight: 800; 
+            font-size: 18px; 
+            color: #00f0ff; 
+            margin-bottom: 20px;
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+            box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);
+        }
+        button {
+            width: 100%; 
+            padding: 14px; 
+            background: #ff2a74; 
+            border: none;
+            color: white; 
+            border-radius: 8px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 0 15px rgba(255, 42, 116, 0.4);
+        }
+        button:hover {
+            background: #00f0ff;
+            color: #05070c;
+            box-shadow: 0 0 20px #00f0ff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Schedule a Session</h2>
+        <p>Your pricing adapts live based on size metrics and selections.</p>
+
+        <form action="/api/book" method="POST">
+            <div class="grid-2">
+                <div><label>Dog Name</label><input type="text" name="dogName" required></div>
+                <div><label>Breed</label><input type="text" name="breed" required></div>
+            </div>
+
+            <label>Dog Size Category</label>
+            <select name="size" id="dogSize" onchange="calculatePrice()">
+                <option value="small">Small (0-10kg)</option>
+                <option value="medium">Medium (11-25kg)</option>
+                <option value="large">Large (26kg+)</option>
+            </select>
+
+            <label>Session Type</label>
+            <select name="orderType" id="orderType" onchange="toggleOrderFields()">
+                <option value="single">Single Custom Walk</option>
+                <option value="subscription">Weekly Subscription (5 Days/Wk)</option>
+            </select>
+
+            <div id="singleWalkFields">
+                <label>Walk Duration</label>
+                <select name="walkDuration" id="walkDuration" onchange="calculatePrice()">
+                    <option value="30">Single 30-Min Walk</option>
+                    <option value="60">Single 1-Hour Walk</option>
+                </select>
+
+                <label>Add Extra Time (+50 EGP per 30m)</label>
+                <select name="extraTime" id="extraTime" onchange="calculatePrice()">
+                    <option value="0">No Extra Time</option>
+                    <option value="1">+30 Minutes</option>
+                    <option value="2">+1 Hour</option>
+                </select>
+            </div>
+
+            <div class="grid-2">
+                <div><label>Date</label><input type="date" name="walkDate" required></div>
+                <div><label>Pickup Time Frame</label><input type="time" name="pickupTime" required></div>
+            </div>
+
+            <div class="price-display" id="totalPriceBox">Calculating Rate...</div>
+
+            <button type="submit">Verify & Request via WhatsApp</button>
+        </form>
+    </div>
+
+    <script>
+        let liveRates = {};
+
+        async function fetchSystemPrices() {
+            const res = await fetch('/api/prices');
+            liveRates = await res.json();
+            calculatePrice();
+        }
+
+        function toggleOrderFields() {
+            const type = document.getElementById('orderType').value;
+            document.getElementById('singleWalkFields').style.display = (type === 'subscription') ? 'none' : 'block';
+            calculatePrice();
+        }
+
+        function calculatePrice() {
+            if (!liveRates.single_30_small) return;
+
+            const size = document.getElementById('dogSize').value;
+            const type = document.getElementById('orderType').value;
+            let finalPrice = 0;
+
+            if (type === 'subscription') {
+                finalPrice = liveRates[`sub_${size}`];
+            } else {
+                const duration = document.getElementById('walkDuration').value;
+                const extra = parseInt(document.getElementById('extraTime').value) || 0;
+                
+                const baseKey = duration === '30' ? `single_30_${size}` : `single_60_${size}`;
+                finalPrice = liveRates[baseKey] + (extra * 50);
+            }
+
+            document.getElementById('totalPriceBox').innerText = `Estimated Cost: ${finalPrice} EGP`;
+        }
+
+        window.onload = () => { fetchSystemPrices(); };
+    </script>
+</body>
+</html>

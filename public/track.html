@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tail Trail - Live Session Tracker</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px 20px; background-color: #f4f6f9; color: #333; }
+        .box { background: white; border: 1px solid #ccc; border-radius: 8px; padding: 30px; max-width: 400px; margin: 0 auto; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .btn { display: inline-block; padding: 12px 24px; background-color: #27ae60; color: white; border-radius: 4px; text-decoration: none; font-weight: bold; margin-top: 15px; }
+        .btn:hover { background-color: #219150; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2 id="statusTitle">Connecting...</h2>
+        <p id="statusMsg">Syncing credentials with the server tracking node...</p>
+        <div id="actionArea"></div>
+        <br>
+        <a href="index.html" style="color:#7f8c8d; text-decoration:none; font-size:14px;">← Back to Dashboard</a>
+    </div>
+
+    <script>
+        async function loadTracker() {
+            try {
+                const res = await fetch('/api/tracking/status');
+                const data = await res.json();
+                const title = document.getElementById('statusTitle');
+                const msg = document.getElementById('statusMsg');
+                const action = document.getElementById('actionArea');
+
+                if (data.live) {
+                    title.innerText = "🔴 Walk Session Live";
+                    msg.innerText = "Youssef is out on a walk with your dog right now! Tap the button below to view the real-time Google Maps feed.";
+                    action.innerHTML = `<a href="${data.link}" target="_blank" class="btn">Track Live Location 📍</a>`;
+                } else {
+                    title.innerText = "Tracker Inactive";
+                    msg.innerText = data.message || "There are no live mapping sessions broadcasting to your profile right now.";
+                    action.innerHTML = '';
+                }
+            } catch (err) {
+                console.error("Tracker link sync error:", err);
+            }
+        }
+        window.onload = loadTracker;
+    </script>
+</body>
+</html>

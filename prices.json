@@ -1,0 +1,11 @@
+{
+  "single_30_small": 100,
+  "single_30_medium": 150,
+  "single_30_large": 175,
+  "single_60_small": 150,
+  "single_60_medium": 250,
+  "single_60_large": 300,
+  "sub_small": 450,
+  "sub_medium": 650,
+  "sub_large": 750
+}
