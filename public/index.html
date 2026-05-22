@@ -412,6 +412,7 @@
                 const meRes = await fetch('/api/me');
                 const meData = await meRes.json();
                 const currentUserDisplay = meData.loggedIn ? meData.user.displayName : null;
+                const isAdmin = meData.loggedIn ? meData.isAdmin : false;
 
                 const res = await fetch('/api/reviews');
                 const reviews = await res.json();
@@ -422,8 +423,11 @@
                     return;
                 }
                 
+                // SURGICAL REPAIR: Store array elements globally on window object to safeguard string values from escaping breaks
+                window.activeReviewsMatrix = reviews;
+                
                 container.innerHTML = reviews.map((r, index) => {
-                    const showDelete = currentUserDisplay === r.name 
+                    const showDelete = (isAdmin || currentUserDisplay === r.name) 
                         ? `<span class="delete-btn" onclick="deleteReview(${index})">Remove</span>` 
                         : '';
                     return `
@@ -443,10 +447,18 @@
 
         async function deleteReview(index) {
             if(!confirm("Remove this log permanently?")) return;
+            
+            // SURGICAL REPAIR: Extract exact name and text metrics directly from memory instead of passing index counts to Postgres
+            const targetedReview = window.activeReviewsMatrix[index];
+            if (!targetedReview) return alert("Error processing matrix index parameters.");
+
             const res = await fetch('/api/reviews/delete', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ index })
+                body: JSON.stringify({ 
+                    name: targetedReview.name, 
+                    text: targetedReview.text 
+                })
             });
             if(res.ok) fetchReviews();
         }
