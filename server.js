@@ -1,6 +1,6 @@
 const express = require('express');
 const session = require('express-session');
-const FileStore = require('session-file-store')(session);
+const pgSession = require('connect-pg-simple')(session); // FIXED: Sessions now save in Postgres permanently
 const fs = require('fs');
 const path = require('path');
 const { Pool } = require('pg'); 
@@ -14,9 +14,10 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false } 
 });
 
-// Automatically create the users table in your Postgres database if it doesn't exist
+// Automatically sync all relational database tables inside Postgres
 const initDbMatrix = async () => {
     try {
+        // 1. Create Users Table
         await pool.query(`
             CREATE TABLE IF NOT EXISTS users (
                 username VARCHAR(50) PRIMARY KEY,
@@ -29,7 +30,31 @@ const initDbMatrix = async () => {
                 joined TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        console.log("Database matrix synchronized successfully: Users table is ready.");
+
+        // 2. Create Reviews Table (FIXED: Saves forever in Postgres database)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS reviews (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(100),
+                text TEXT,
+                date VARCHAR(50)
+            );
+        `);
+
+        // 3. Create Session Table (FIXED: Required for connect-pg-simple session persistence)
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS "session" (
+                "sid" varchar NOT NULL COLLATE "default",
+                "sess" json NOT NULL,
+                "expire" timestamp(6) NOT NULL
+            ) WITH (OIDS=FALSE);
+            
+            ALTER TABLE "session" DROP CONSTRAINT IF EXISTS "session_pkey";
+            ALTER TABLE "session" ADD CONSTRAINT "session_pkey" PRIMARY KEY ("sid") NOT DEFERRABLE INITIALLY IMMEDIATE;
+            CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire");
+        `);
+
+        console.log("Database matrix synchronized successfully: All tables locked and ready.");
     } catch (err) {
         console.error("Error initializing database matrix:", err);
     }
@@ -41,22 +66,25 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 
-// Persistent Session Configuration Configuration
+// FIXED: Session configuration shifted completely to Postgres so closing tabs won't log u out
 app.use(session({ 
-    store: new FileStore({ path: './sessions', logFn: function(){} }),
+    store: new pgSession({
+        pool: pool,                // Connection pool
+        tableName: 'session'       // Use our persistent session table
+    }),
     secret: 'tailtrail-ultra-secret', 
     resave: false, 
     saveUninitialized: false,
     cookie: { 
-        maxAge: 365 * 24 * 60 * 60 * 1000,
-        secure: false 
+        maxAge: 365 * 24 * 60 * 60 * 1000, // 1 Full Year cookie lifetime matrix
+        secure: false,                     // Set to true if running full HTTPS
+        httpOnly: true
     }
 }));
 
-// Local JSON Databases Initialization
+// Local JSON Databases Initialization (Only for Bookings & Tracking for now)
 const dbFiles = {
     bookings: 'bookings.json',
-    reviews: 'reviews.json',
     tracking: 'tracking.json',
     prices: 'prices.json'
 };
@@ -272,7 +300,7 @@ app.post('/api/logout', (req, res) => {
     });
 });
 
-// BOOK A WALK TERMINAL (STABLE DATA REDIRECT WITH DYNAMIC SELECTION PATTERNS)
+// BOOK A WALK TERMINAL
 app.post('/api/book', requireAuth, (req, res) => {
     const { dogName, breed, size, orderType, walkDuration, extraTime, walkDate, pickupTime, paymentMethod } = req.body;
     let bookings = readDb(dbFiles.bookings);
@@ -297,7 +325,6 @@ app.post('/api/book', requireAuth, (req, res) => {
         }
     }
 
-    // Capture payment configuration safely
     const chosenPayment = paymentMethod || "Cash"; 
     const addressStr = `${req.session.user.street}, Bldg ${req.session.user.building}, Apt ${req.session.user.apt}`;
     
@@ -332,34 +359,57 @@ app.post('/api/book', requireAuth, (req, res) => {
                         `💳 *Intended Payment Option:* ${chosenPayment} (To be paid AFTER the walk)\n\n` +
                         `Please verify this schedule window to confirm our session. Thank u!`;
     
-    // BACKEND OVERHAUL DONE: Delivers clean tracking object back to front scripting context
     res.json({ 
         success: true, 
         whatsappUrl: `https://wa.me/${myWhatsAppNumber}?text=${encodeURIComponent(textMessage)}` 
     });
 });
 
-// GET MY BOOKINGS, REVIEWS, GALLERY ACCESS INTERFACES
+// GET MY BOOKINGS INTERFACES
 app.get('/api/my-books', requireAuth, (req, res) => {
     let bookings = readDb(dbFiles.bookings);
     res.json(bookings.filter(b => b.userAccount === req.session.user.username));
 });
-app.get('/api/reviews', (req, res) => res.json(readDb(dbFiles.reviews)));
-app.post('/api/reviews', (req, res) => {
-    let reviews = readDb(dbFiles.reviews);
-    reviews.unshift({ name: censorText(req.body.name), text: censorText(req.body.text), date: new Date().toLocaleDateString() });
-    writeDb(dbFiles.reviews, reviews);
-    res.redirect('/index.html');
-});
-app.post('/api/reviews/delete', requireAuth, (req, res) => {
-    let reviews = readDb(dbFiles.reviews);
-    if (reviews[req.body.index] && reviews[req.body.index].name === req.session.user.displayName) {
-        reviews.splice(req.body.index, 1);
-        writeDb(dbFiles.reviews, reviews);
-        return res.json({ success: true });
+
+// FIXED: FETCH REVIEWS FROM POSTGRES DATA MATRIX (Saves forever, visible to everyone)
+app.get('/api/reviews', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT name, text, date FROM reviews ORDER BY id DESC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to pull reviews from database matrix." });
     }
-    res.status(403).json({ error: "Unauthorized" });
 });
+
+// FIXED: POST REVIEWS STRAIGHT INTO DATABASE MATRIX
+app.post('/api/reviews', async (req, res) => {
+    const name = censorText(req.body.name);
+    const text = censorText(req.body.text);
+    const date = new Date().toLocaleDateString();
+    
+    try {
+        await pool.query('INSERT INTO reviews (name, text, date) VALUES ($1, $2, $3)', [name, text, date]);
+        res.redirect('/index.html');
+    } catch (err) {
+        res.status(500).send("Failed to save review permanently.");
+    }
+});
+
+// FIXED: DELETE REVIEWS VIA POSTGRES MATRIX CHECKPOINTS
+app.post('/api/reviews/delete', requireAuth, async (req, res) => {
+    const { name, text } = req.body; // Pass identifiers to clear specific line items safely
+    if (name !== req.session.user.displayName) {
+        return res.status(403).json({ error: "Unauthorized access" });
+    }
+
+    try {
+        await pool.query('DELETE FROM reviews WHERE name = $1 AND text = $2', [name, text]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: "Could not drop line from matrix storage." });
+    }
+});
+
 app.get('/api/gallery', (req, res) => {
     fs.readdir(path.join(__dirname, 'public', 'gallery'), (err, files) => {
         if (err) return res.json([]);
