@@ -3,264 +3,464 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tail Trail | Dog Walking Matrix</title>
+    <title>Tail Trail - Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0d0f12;
-            --card-bg: #161a22;
-            --accent-color: #00ffcc;
-            --text-color: #ffffff;
-            --text-muted: #8b949e;
-            --danger-color: #ff4d4d;
+            --bg: #0d0614;
+            --card-bg: rgba(18, 10, 28, 0.75);
+            --text: #f8fafc;
+            --muted: #a78bfa;
+            --border: #ff007f;
+            --primary-glow: linear-gradient(135deg, #00f2fe, #ff007f);
+            --accent: #00f2fe;
+            --input-bg: rgba(0, 0, 0, 0.4);
+            --admin-glow: linear-gradient(135deg, #f43f5e, #fb7185);
+            --neon-glow: 0 0 15px rgba(255, 0, 127, 0.4), 0 0 30px rgba(0, 242, 254, 0.2);
         }
+        body.light-mode {
+            --bg: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text: #0f172a;
+            --muted: #64748b;
+            --border: #db2777;
+            --accent: #0284c7;
+            --input-bg: rgba(0, 0, 0, 0.04);
+            --neon-glow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        }
+        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background 0.3s ease, color 0.3s ease;
             margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        h1, h2 {
-            color: var(--accent-color);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        .review-box {
-            background-color: var(--card-bg);
-            border: 1px solid #21262d;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: var(--text-muted);
-        }
-        .form-group input, .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            background-color: #0d0f12;
-            border: 1px solid #30363d;
-            border-radius: 6px;
-            color: #fff;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
             box-sizing: border-box;
         }
-        .form-group textarea {
-            resize: vertical;
-            height: 100px;
-        }
-        .btn {
-            background-color: var(--accent-color);
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-        .btn:hover {
-            opacity: 0.9;
-        }
-        .review-card {
-            background-color: var(--card-bg);
-            border-left: 4px solid var(--accent-color);
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 0 8px 8px 0;
-            position: relative;
-        }
-        .review-header {
+        
+        .container {
+            width: 100%;
+            max-width: 600px;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
+            flex-direction: column;
+            align-items: center;
         }
-        .review-name {
-            font-weight: bold;
-            color: var(--accent-color);
+        
+        .top-action-bar {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
         }
-        .review-date {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-        .review-text {
-            line-height: 1.5;
-        }
-        .btn-delete {
-            background-color: var(--danger-color);
-            color: #fff;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.8rem;
+        
+        .theme-toggle, .admin-btn {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--border);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 30px;
             cursor: pointer;
-            margin-top: 10px;
-            display: none; /* Controlled dynamically by auth script matrix */
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: var(--neon-glow);
         }
-        .btn-delete:hover {
-            background-color: #cc0000;
+        
+        .admin-btn {
+            border-color: #ef4444;
+            color: #ff8585;
+            display: none;
         }
-        .auth-banner {
-            background-color: #1f1515;
-            border: 1px solid #dc3545;
-            padding: 10px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            text-align: center;
+        
+        .settings-gear-btn {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            padding: 9px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            color: var(--text);
+            box-shadow: var(--neon-glow);
         }
+        .settings-gear-btn:hover {
+            transform: rotate(45deg);
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.6);
+        }
+        
+        .settings-modal, .admin-modal {
+            width: 100%;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 24px;
+            box-sizing: border-box;
+            display: none;
+            box-shadow: var(--neon-glow);
+        }
+        
+        .admin-modal { border-color: #ef4444; }
+        
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 24px;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--neon-glow);
+        }
+
+        .card:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+        }
+        
+        h1 {
+            font-size: 34px;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            letter-spacing: -1px;
+            background: var(--primary-glow);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        h2 { font-size: 22px; font-weight: 700; margin: 0 0 18px 0; color: var(--accent); }
+        h3 { font-size: 16px; font-weight: 700; margin: 0 0 6px 0; }
+        
+        .nav-links { display: flex; gap: 16px; justify-content: center; margin-top: 24px; }
+        .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; }
+        .nav-links a:hover { color: #00f2fe; text-shadow: 0 0 8px rgba(0,242,254,0.5); }
+        
+        .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; min-height: 50px; }
+        .gallery-grid img { width: 100%; height: 160px; object-fit: cover; border-radius: 12px; border: 2px solid var(--border); box-shadow: 0 0 10px rgba(255,0,127,0.2); }
+        
+        .review-box { border-bottom: 1px solid rgba(255, 0, 127, 0.2); padding: 16px 0; }
+        .review-box:last-child { border-bottom: none; }
+        .review-header { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; }
+        .review-text { font-size: 14px; color: var(--text); opacity: 0.8; margin: 5px 0 0 0; }
+        .delete-btn { color: #ef4444; cursor: pointer; font-size: 12px; font-weight: 600; margin-left: 12px; }
+        .hero-banner { height: 5px; width: 100%; background: var(--primary-glow); position: absolute; top: 0; left: 0; }
+        
+        input, textarea {
+            width: 100%; padding: 12px; background: var(--input-bg); border: 2px solid var(--border);
+            color: var(--text); border-radius: 8px; box-sizing: border-box; margin-bottom: 14px; font-family: inherit; font-size: 14px;
+            transition: all 0.2s ease;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 12px rgba(0, 242, 254, 0.4);
+        }
+        label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; }
+        
+        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        button.action-btn {
+            width: 100%; padding: 14px; background: linear-gradient(135deg, #00f2fe, #ff007f);
+            border: none; color: white; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px;
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.3);
+            transition: all 0.2s ease;
+        }
+        button.action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.6);
+        }
+        button.admin-save-btn { background: var(--admin-glow); width: 100%; padding: 14px; border: none; color: white; border-radius: 8px; font-weight: 700; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>🐾 Tail Trail Review Board Matrix 🐾</h1>
-        <div id="auth-status" class="auth-banner">Checking secure session status...</div>
+        
+        <div class="top-action-bar">
+            <button class="admin-btn" id="adminToggleBtn" onclick="toggleAdminPanel()">🛠️ Admin Panel</button>
+            <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Mode</button>
+            <button class="settings-gear-btn" onclick="toggleSettingsPanel()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+            </button>
+        </div>
 
-        <div class="review-box">
-            <h2>Leave a Feed Matrix Review</h2>
-            <form action="/api/reviews" method="POST" id="review-form">
-                <div class="form-group">
-                    <label for="review-name">Display Name:</label>
-                    <input type="text" id="review-name" name="name" required placeholder="Your display name">
+        <div class="admin-modal" id="adminPanel">
+            <h3 style="color:#f43f5e; margin-top:0;">Tail Trail Rate Management Vault</h3>
+            <p style="color:var(--muted); font-size:13px; margin-bottom:20px;">Modify active site rates. Changes propagate immediately across all calculators.</p>
+            
+            <form onsubmit="saveSystemPrices(event)">
+                <h4 style="margin:0 0 8px 0; font-size:14px;">Single 30-Min Walks (EGP)</h4>
+                <div class="settings-grid">
+                    <div><label>Small</label><input type="number" id="p_30_s" required></div>
+                    <div><label>Medium</label><input type="number" id="p_30_m" required></div>
+                    <div><label>Large</label><input type="number" id="p_30_l" required></div>
                 </div>
-                <div class="form-group">
-                    <label for="review-text">Your Review:</label>
-                    <textarea id="review-text" name="text" required placeholder="Type your experience here..."></textarea>
+
+                <h4 style="margin:10px 0 8px 0; font-size:14px;">Single 1-Hour Walks (EGP)</h4>
+                <div class="settings-grid">
+                    <div><label>Small</label><input type="number" id="p_60_s" required></div>
+                    <div><label>Medium</label><input type="number" id="p_60_m" required></div>
+                    <div><label>Large</label><input type="number" id="p_60_l" required></div>
                 </div>
-                <button type="submit" class="btn">Submit Live Review</button>
+
+                <h4 style="margin:10px 0 8px 0; font-size:14px;">Weekly Subscriptions (EGP)</h4>
+                <div class="settings-grid">
+                    <div><label>Small</label><input type="number" id="p_sub_s" required></div>
+                    <div><label>Medium</label><input type="number" id="p_sub_m" required></div>
+                    <div><label>Large</label><input type="number" id="p_sub_l" required></div>
+                </div>
+
+                <button type="submit" class="admin-save-btn">Push Live Pricing Modifications</button>
             </form>
         </div>
 
-        <h2>Live Reviews Feed</h2>
-        <div id="reviews-container">Loading latest database records...</div>
+        <div class="settings-modal" id="settingsPanel">
+            <h3 style="margin-top:0;">Profile Update Panel</h3>
+            <p style="color:var(--muted); font-size:13px; margin-bottom:20px;">Edit database metrics for your account records here.</p>
+            
+            <form onsubmit="updateProfileData(event)">
+                <label>Display Name (Public)</label>
+                <input type="text" id="settingsDisplay" required>
+
+                <label>Phone Number</label>
+                <input type="tel" id="settingsPhone" required>
+
+                <div class="settings-grid">
+                    <div>
+                        <label>Street</label>
+                        <input type="text" id="settingsStreet" required>
+                    </div>
+                    <div>
+                        <label>Building</label>
+                        <input type="text" id="settingsBuilding" required>
+                    </div>
+                </div>
+                <label>Apartment No.</label>
+                <input type="text" id="settingsApt" required>
+
+                <button type="submit" class="action-btn" style="margin-bottom:12px;">Save Profile Changes</button>
+            </form>
+            <button onclick="executeSecureLogout()" style="width:100%; padding:12px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); color:#f87171; border-radius:8px; font-weight:700; cursor:pointer;">Logout of Session</button>
+        </div>
+
+        <div class="card" style="text-align: center;">
+            <div class="hero-banner"></div>
+            <h1>Tail Trail</h1>
+            <p style="color: var(--muted); font-size: 15px; margin: 0 0 28px 0;">Cairo's Premium Canine Concierge & Walking Service</p>
+            <nav>
+                <a href="book.html" class="btn" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #00f2fe, #ff007f); color: white; border-radius: 8px; text-decoration: none; font-weight: 700; box-shadow: 0 4px 14px rgba(255,0,127,0.35);">Book a Professional Session</a>
+                <div class="nav-links">
+                    <a href="my-books.html">Booking History</a><span>•</span><a href="track.html">Live Tracking Feed</a>
+                </div>
+            </nav>
+        </div>
+
+        <div class="card">
+            <h2>Static Gallery Assets</h2>
+            <div class="gallery-grid" id="galleryContainer"></div>
+        </div>
+
+        <div class="card">
+            <h2>Verified Client Feedback</h2>
+            <div id="reviewsContainer" style="max-height: 250px; overflow-y: auto; margin-bottom: 24px; padding-right:4px;"></div>
+            <form action="/api/reviews" method="POST">
+                <input type="text" name="name" id="reviewerNameField" readonly style="color:var(--muted); cursor:not-allowed;">
+                <textarea name="text" rows="3" placeholder="Share your experience..." required></textarea>
+                <button type="submit" class="action-btn">Publish Review</button>
+            </form>
+        </div>
     </div>
 
     <script>
-        let currentUserMatrix = null;
-        let isAdminMatrix = false;
-
-        // 1. ASYNC CHECK: Verify exact session logs on page wake
-        async function checkUserSession() {
-            try {
-                const res = await fetch('/api/me');
-                const data = await res.json();
-                const authBanner = document.getElementById('auth-status');
-                const inputName = document.getElementById('review-name');
-                
-                if (data.loggedIn) {
-                    currentUserMatrix = data.user;
-                    isAdminMatrix = data.isAdmin;
-                    authBanner.innerHTML = `🟢 Logged in as: <strong>${currentUserMatrix.displayName}</strong> (@${currentUserMatrix.username}) ${isAdminMatrix ? '[ADMIN]' : ''}`;
-                    authBanner.style.backgroundColor = '#151f17';
-                    authBanner.style.borderColor = '#28a745';
-                    
-                    // Auto-fill and lock name field to prevent spoofing database records
-                    if (inputName) {
-                        inputName.value = currentUserMatrix.displayName;
-                        inputName.setAttribute('readonly', true);
-                    }
-                } else {
-                    authBanner.innerHTML = `🔴 Browsing as Guest. Log in to manage bookings or unlock deletion options.`;
-                    authBanner.style.backgroundColor = '#1c1c1c';
-                    authBanner.style.borderColor = '#444';
-                }
-            } catch (err) {
-                console.error("Session verification system failed:", err);
-            }
-            // Fetch reviews immediately after session logic drops
-            fetchReviewsMatrix();
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
         }
 
-        // 2. ASYNC FETCH: Render permanent Postgres records to the display screen
-        async function fetchReviewsMatrix() {
-            const container = document.getElementById('reviews-container');
+        function toggleTheme() {
+            const isLight = document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        }
+
+        async function checkAuth() {
+            const res = await fetch('/api/me');
+            const data = await res.json();
+            if (!data.loggedIn) {
+                window.location.href = "/login.html";
+            } else {
+                document.getElementById('reviewerNameField').value = data.user.displayName;
+                
+                document.getElementById('settingsDisplay').value = data.user.displayName;
+                document.getElementById('settingsPhone').value = data.user.phone;
+                document.getElementById('settingsStreet').value = data.user.street;
+                document.getElementById('settingsBuilding').value = data.user.building;
+                document.getElementById('settingsApt').value = data.user.apt;
+
+                if (data.isAdmin) {
+                    document.getElementById('adminToggleBtn').style.display = "inline-block";
+                    loadPriceInputs();
+                }
+            }
+        }
+
+        function toggleAdminPanel() {
+            const p = document.getElementById('adminPanel');
+            const s = document.getElementById('settingsPanel');
+            s.style.display = "none";
+            p.style.display = (p.style.display === "block") ? "none" : "block";
+        }
+        
+        function toggleSettingsPanel() {
+            const s = document.getElementById('settingsPanel');
+            const p = document.getElementById('adminPanel');
+            p.style.display = "none";
+            s.style.display = (s.style.display === "block") ? "none" : "block";
+        }
+
+        async function updateProfileData(e) {
+            e.preventDefault();
+            const payload = {
+                displayName: document.getElementById('settingsDisplay').value,
+                phone: document.getElementById('settingsPhone').value,
+                street: document.getElementById('settingsStreet').value,
+                building: document.getElementById('settingsBuilding').value,
+                apt: document.getElementById('settingsApt').value
+            };
+            const res = await fetch('/api/user/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if(res.ok) {
+                alert("Profile metrics successfully synced!");
+                toggleSettingsPanel();
+                await checkAuth();
+                await fetchReviews();
+            } else {
+                alert("Failed to synchronize parameters with data matrix.");
+            }
+        }
+
+        async function loadPriceInputs() {
+            const res = await fetch('/api/prices');
+            const p = await res.json();
+            document.getElementById('p_30_s').value = p.single_30_small;
+            document.getElementById('p_30_m').value = p.single_30_medium;
+            document.getElementById('p_30_l').value = p.single_30_large;
+            document.getElementById('p_60_s').value = p.single_60_small;
+            document.getElementById('p_60_m').value = p.single_60_medium;
+            document.getElementById('p_60_l').value = p.single_60_large;
+            document.getElementById('p_sub_s').value = p.sub_small;
+            document.getElementById('p_sub_m').value = p.sub_medium;
+            document.getElementById('p_sub_l').value = p.sub_large;
+        }
+
+        async function saveSystemPrices(e) {
+            e.preventDefault();
+            const payload = {
+                single_30_small: document.getElementById('p_30_s').value,
+                single_30_medium: document.getElementById('p_30_m').value,
+                single_30_large: document.getElementById('p_30_l').value,
+                single_60_small: document.getElementById('p_60_s').value,
+                single_60_medium: document.getElementById('p_60_m').value,
+                single_60_large: document.getElementById('p_60_l').value,
+                sub_small: document.getElementById('p_sub_s').value,
+                sub_medium: document.getElementById('p_sub_m').value,
+                sub_large: document.getElementById('p_sub_l').value
+            };
+            const res = await fetch('/api/admin/update-prices', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) { alert("Site-wide pricing matrix successfully synchronized!"); toggleAdminPanel(); }
+        }
+
+        async function fetchGallery() {
             try {
+                const res = await fetch('/api/gallery');
+                const images = await res.json();
+                const container = document.getElementById('galleryContainer');
+                if (!images || images.length === 0) {
+                    container.innerHTML = '<p style="font-size:13px; color:var(--muted); grid-column:1/3; text-align:center; padding: 20px 0;">Create a folder named "gallery" inside your "public" directory and add some images (e.g., public/gallery/dog1.jpg)!</p>';
+                    return;
+                }
+                container.innerHTML = images.map(img => `<img src="/gallery/${img}">`).join('');
+            } catch (err) {
+                document.getElementById('galleryContainer').innerHTML = '<p style="font-size:13px; color:var(--muted);">Gallery offline.</p>';
+            }
+        }
+
+        async function fetchReviews() {
+            try {
+                const meRes = await fetch('/api/me');
+                const meData = await meRes.json();
+                const currentUserDisplay = meData.loggedIn ? meData.user.displayName : null;
+
                 const res = await fetch('/api/reviews');
                 const reviews = await res.json();
+                const container = document.getElementById('reviewsContainer');
                 
                 if (reviews.length === 0) {
-                    container.innerHTML = `<p style="color: var(--text-muted);">No reviews posted to the database yet, fr.</p>`;
+                    container.innerHTML = '<p style="font-size:13px; color:var(--muted);">No feedback records submitted yet.</p>';
                     return;
                 }
                 
-                container.innerHTML = ''; // Wipe loading placeholder text
-                
-                reviews.forEach(review => {
-                    const card = document.createElement('div');
-                    card.className = 'review-card';
-                    
-                    // FIXED: Check if current profile username or display name matches the target entry
-                    // Admin mode overrides identity checks completely to grant deletion privilege
-                    const canDelete = isAdminMatrix || (currentUserMatrix && currentUserMatrix.displayName === review.name);
-                    
-                    card.innerHTML = `
-                        <div class="review-header">
-                            <span class="review-name">${escapeHTML(review.name)}</span>
-                            <span class="review-date">${review.date}</span>
+                container.innerHTML = reviews.map((r, index) => {
+                    const showDelete = currentUserDisplay === r.name 
+                        ? `<span class="delete-btn" onclick="deleteReview(${index})">Remove</span>` 
+                        : '';
+                    return `
+                        <div class="review-box">
+                            <div class="review-header">
+                                <span>${r.name} ${showDelete}</span>
+                                <span style="color:var(--muted); font-size:12px; font-weight:400;">${r.date}</span>
+                            </div>
+                            <p class="review-text">${r.text}</p>
                         </div>
-                        <div class="review-text">${escapeHTML(review.text)}</div>
-                        <button class="btn-delete" 
-                                style="display: ${canDelete ? 'block' : 'none'}" 
-                                onclick="fireDeleteRoute('${escapeJS(review.name)}', '${escapeJS(review.text)}')">
-                            Delete Review
-                        </button>
                     `;
-                    container.appendChild(card);
-                });
+                }).join('');
             } catch (err) {
-                container.innerHTML = `<p style="color: var(--danger-color);">Error fetching live records from Postgres matrix.</p>`;
+                document.getElementById('reviewsContainer').innerHTML = '<p style="font-size:13px; color:var(--muted);">Error downloading server feedback records.</p>';
             }
         }
 
-        // 3. ASYNC DELETE ENGINE: Pass explicit JSON blocks directly to backend server checkpoints
-        async function fireDeleteRoute(reviewName, reviewText) {
-            if (!confirm("Are u sure u want to wipe this review from the server history forever?")) return;
-
-            try {
-                // FIXED: We pass the exact strings straight into the request payload matrix
-                const response = await fetch('/api/reviews/delete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        name: reviewName, 
-                        text: reviewText 
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    // Instantly sync UI with the database matrix
-                    fetchReviewsMatrix(); 
-                } else {
-                    alert(`System Halt: ${result.error || "Could not execute wipe protocol."}`);
-                }
-            } catch (err) {
-                alert("Network error: Failed to connect to server deletion endpoint.");
-            }
+        async function deleteReview(index) {
+            if(!confirm("Remove this log permanently?")) return;
+            const res = await fetch('/api/reviews/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index })
+            });
+            if(res.ok) fetchReviews();
         }
 
-        // Security sanitization helper scripts to prevent injection crashes
-        function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-            );
+        async function executeSecureLogout() {
+            const res = await fetch('/api/logout', { method: 'POST' });
+            if(res.ok) window.location.href = "/login.html";
         }
 
-        function escapeJS(str) {
-            return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r');
-        }
-
-        // Initialize script suite on page wake sequence
-        window.onload = checkUserSession;
+        window.onload = () => { 
+            checkAuth(); 
+            fetchGallery();
+            fetchReviews();
+        };
     </script>
 </body>
 </html>
